@@ -1,16 +1,14 @@
 #!/usr/bin/env node
-"use strict";
-
 import * as program from 'commander';
 import Chullo = require('./chullo');
 
-let foo = new Chullo();
+let client = new Chullo();
 
 program
     .version('0.0.1')
     .command('watch <dir>')
     .action((dir) => {
-        foo.hello();
+        client.watch(dir);
     })
     .command('upload <file>')
     .action((file) => {
