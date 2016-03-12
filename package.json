@@ -1,0 +1,24 @@
+{
+  "name": "chullo-client",
+  "version": "0.0.1",
+  "description": "Client for the Chullo file server",
+  "author": "Victor Jacobs",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/victorjacobs/chullo-client"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "prepublish": "typings install && npm run build",
+    "watch": "tsc -w"
+  },
+  "bin": {
+    "chullo": "./dist/index.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "oauth": "^0.9.14",
+    "superagent": "^1.8.0"
+  }
+}

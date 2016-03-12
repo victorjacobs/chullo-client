@@ -1,0 +1,6 @@
+{
+  "ambientDependencies": {
+    "commander": "registry:dt/commander#2.3.0+20160102232444",
+    "node": "registry:dt/node#4.0.0+20160311162451"
+  }
+}
