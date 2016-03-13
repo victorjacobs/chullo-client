@@ -40,15 +40,20 @@ class Chullo {
         });
     }
 
-    watch(directory: string) {
-        let watcher = chokidar.watch(directory);
+    watch(directory: string, pattern?: string, removeAfterUpload?: boolean):void {
+        let watchPattern = directory;
+        if (pattern) {
+            watchPattern += '/' + pattern;
+        }
 
-        watcher.on('ready', () => {
-            // Only start watching after initial scan completed
-            watcher.on('add', path => {
-                this.upload(directory + '/' + path);
-            })
+        let watcher = chokidar.watch(watchPattern, {
+            ignoreInitial: true,
+            awaitWriteFinish: true
         });
+
+        watcher.on('add', path => {
+            this.upload(directory + '/' + path);
+        })
     }
 
     upload(file: string) {
