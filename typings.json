@@ -1,6 +1,6 @@
 {
   "ambientDependencies": {
-    "chokidar": "registry:dt/chokidar#1.0.0+20150305075054",
+    "chokidar": "registry:dt/chokidar#1.4.3+20160316155526",
     "commander": "registry:dt/commander#2.3.0+20160102232444",
     "node": "registry:dt/node#4.0.0+20160311162451",
     "superagent": "registry:dt/superagent#1.4.0+20151124102505"

@@ -1,8 +1,9 @@
 import * as chokidar from 'chokidar';
 import * as request from 'superagent';
 import {Promise} from 'es6-promise';
+import {Clipboard} from './clipboard';
 
-class Chullo {
+export class Chullo {
     // TODO factor these out to environment-dependent things
     private accessToken: Promise<string>;
     private clientId: string;
@@ -13,7 +14,6 @@ class Chullo {
         this.endpoint = 'http://localhost:3000';
         this.clientId = 'foo';
         this.clientSecret = 'bar';
-
         this.authenticate('victor@chullo.io', 'test');
     }
 
@@ -59,34 +59,48 @@ class Chullo {
     upload(file: string) {
         this.accessToken.then(accessToken => {
             console.log('uploading ' + file + ' accessToken ' + accessToken);
-            // First do a POST to get a unique url, return it and then
-            request
-                .post(this.endpoint + '/files')
-                .type('json')
-                .set('Authorization', 'Bearer ' + accessToken)
-                .send({
-                    name: file.split('/').pop()
-                })
-                .end((err, response) => {
-                    if (err) {
-                        console.log('Error uploading: ' + err);
-                        return;
-                    }
+            // First do a POST to get a unique url to upload to
+            return new Promise((resolve, reject) => {
+                console.log('Creating file');
+                request
+                    .post(this.endpoint + '/files')
+                    .set('Authorization', 'Bearer ' + accessToken)
+                    .type('json')
+                    .send({
+                        name: file.split('/').pop()
+                    })
+                    .end((err, response) => {
+                        if (err) {
+                            reject('Error posting to files: ' + err);
+                        }
 
-                    console.log('View URL: ' + response.body);
+                        console.log('View URL: ' + response.body);
+                        resolve(response);
+                    })
+                ;
+            })
+        }).then((response: request.Response) => {
+            console.log('Uploading file');
+            // Then upload the file
+            this.accessToken.then(accessToken => {
+                request
+                    .post(this.endpoint + '/upload/' + response.body._id)
+                    .set('Authorization', 'Bearer ' + accessToken)
+                    .attach('file', file)
+                    .end((err, response) => {
+                        if (err) {
+                            // TODO this reject doesnt work yet apparently
+                            return Promise.reject(err);
+                        }
 
-                    request
-                        .post(this.endpoint + '/upload/' + response.body._id)
-                        .set('Authorization', 'Bearer ' + accessToken)
-                        .attach('file', file)
-                        .end((err, response) => {
-                            console.log(response.body);
-                        })
-                    ;
-                })
-            ;
+                        console.log(response.body);
+
+                        return response;
+                    })
+                ;
+            });
+        }).catch(err => {
+            console.log('In catch block ' + err);
         });
     }
 }
-
-export = Chullo;
