@@ -3,9 +3,11 @@ import * as chokidar from 'chokidar';
 import * as request from 'superagent';
 import {Promise} from 'es6-promise';
 import * as ProgressBar from 'progress';
+let Table = require('cli-table');
+
 import {Clipboard} from './clipboard';
 
-export class Chullo {
+export class Client {
     // TODO more properly check responses from api (through status codes)
     // TODO factor these out to environment-dependent things
     private accessToken: Promise<string>;
@@ -37,6 +39,45 @@ export class Chullo {
                         resolve(response.body.access_token);
                     } else {
                         reject(err);
+                    }
+                })
+            ;
+        });
+    }
+
+    list() {
+        this.accessToken.then(accessToken => {
+            request
+                .get(this.endpoint + '/files')
+                .set('Authorization', 'Bearer ' + accessToken)
+                .type('json')
+                .end((err, response) => {
+                    var table = new Table({
+                        head: ['Id', 'Name', 'Type', 'Uploaded'],
+                        colWidths: [30, 30, 30, 30],
+                        chars: {'mid': '', 'left-mid': '', 'mid-mid': '', 'right-mid': ''}
+                    });
+
+                    for (var file of response.body) {
+                        table.push([
+                            file._id, file.name, file.mime || 'none', file.updatedAt
+                        ]);
+                    }
+
+                    console.log(table.toString());
+                })
+        });
+    }
+
+    delete(id: string) {
+        this.accessToken.then(accessToken => {
+            request
+                .delete(this.endpoint + '/files/' + id)
+                .set('Authorization ', 'Bearer ' + accessToken)
+                .type('json')
+                .end((err, response) => {
+                    if (err || !response.ok) {
+                        console.log('Something went wrong: ' + err);
                     }
                 })
             ;

@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import * as program from 'commander';
-import {Chullo} from './chullo';
+import {Client} from './client';
+// import * as osenv from 'osenv';
 
-let client = new Chullo();
+let client = new Client();
 
 program
     .version('0.0.1')
@@ -20,8 +21,24 @@ program
 program
     .command('upload <file>')
     .description('Upload a single file')
-    .action((file) => {
+    .action(file => {
         client.upload(file);
+    })
+;
+
+program
+    .command('list')
+    .description('List all files uploaded')
+    .action(() => {
+        client.list();
+    })
+;
+
+program
+    .command('delete <id>')
+    .description('Deletes given file')
+    .action(id => {
+        client.delete(id);
     })
 ;
 
