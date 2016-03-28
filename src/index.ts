@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import * as program from 'commander';
 import {Client} from './client';
-// import * as osenv from 'osenv';
+import {Configuration} from './configuration';
 
 let client = new Client();
 

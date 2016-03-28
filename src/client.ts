@@ -6,11 +6,12 @@ import * as ProgressBar from 'progress';
 let Table = require('cli-table');
 
 import {Clipboard} from './clipboard';
+import {OAuth} from './oauth';
 
 export class Client {
     // TODO more properly check responses from api (through status codes)
     // TODO factor these out to environment-dependent things
-    private accessToken: Promise<string>;
+    private token: Promise<any>;
     private clientId: string;
     private clientSecret: string;
     private endpoint: string;
@@ -23,33 +24,15 @@ export class Client {
     }
 
     private authenticate(username: string, password: string) {
-        this.accessToken = new Promise((resolve, reject) => {
-            request
-                .post(this.endpoint + '/oauth/token')
-                .type('form')
-                .send({
-                    grant_type: 'password',
-                    username: username,
-                    password: password,
-                    client_id: this.clientId,
-                    client_secret: this.clientSecret
-                })
-                .end((err, response) => {
-                    if (!err) {
-                        resolve(response.body.access_token);
-                    } else {
-                        reject(err);
-                    }
-                })
-            ;
-        });
+        let oauth = new OAuth(this.clientId, this.clientSecret, this.endpoint);
+        this.token = oauth.authenticate(username, password);
     }
 
     list() {
-        this.accessToken.then(accessToken => {
+        this.token.then(token => {
             request
-                .get(this.endpoint + '/files')
-                .set('Authorization', 'Bearer ' + accessToken)
+                .get(`${this.endpoint}/files`)
+                .set('Authorization', `Bearer ${token.access_token}`)
                 .type('json')
                 .end((err, response) => {
                     var table = new Table({
@@ -70,14 +53,14 @@ export class Client {
     }
 
     delete(id: string) {
-        this.accessToken.then(accessToken => {
+        this.token.then(token => {
             request
-                .delete(this.endpoint + '/files/' + id)
-                .set('Authorization ', 'Bearer ' + accessToken)
+                .delete(`${this.endpoint}/files/${id}`)
+                .set('Authorization', `Bearer ${token.access_token}`)
                 .type('json')
                 .end((err, response) => {
                     if (err || !response.ok) {
-                        console.log('Something went wrong: ' + err);
+                        console.log(`Something went wrong: ${err}`);
                     }
                 })
             ;
@@ -96,7 +79,7 @@ export class Client {
         });
 
         watcher.on('add', path => {
-            this.upload(directory + '/' + path).then(() => {
+            this.upload(`${directory}/${path}`).then(() => {
                 if (removeAfterUpload) {
                     fs.unlinkSync(path);
                 }
@@ -105,23 +88,23 @@ export class Client {
     }
 
     upload(file: string): Promise<void> {
-        return this.accessToken.then(accessToken => {
-            console.log('Starting upload of ' + file);
+        return this.token.then(token => {
+            console.log(`Starting upload of ${file}`);
             // First do a POST to get a unique url to upload to
             return new Promise((resolve, reject) => {
                 request
-                    .post(this.endpoint + '/files')
-                    .set('Authorization', 'Bearer ' + accessToken)
+                    .post(`${this.endpoint}/files`)
+                    .set('Authorization', `Bearer ${token.access_token}`)
                     .type('json')
                     .send({
                         name: file.split('/').pop()
                     })
                     .end((err, response) => {
                         if (err) {
-                            reject('Error posting to files: ' + err);
+                            reject(`Error posting to files: ${err}`);
                         }
 
-                        console.log('File id ' + response.body._id + ' view URL: ' + response.body.viewUrl);
+                        console.log(`File id ${response.body._id} view URL: ${response.body.viewUrl}`);
                         Clipboard.copy(response.body.viewUrl);
                         resolve(response);
                     })
@@ -129,7 +112,7 @@ export class Client {
             })
         }).then((response: request.Response) => {
             // Then upload the file
-            this.accessToken.then(accessToken => {
+            this.token.then(token => {
                 let bar = new ProgressBar('Uploading [:bar] :percent :etas', {
                     complete: '=',
                     incomplete: ' ',
@@ -138,8 +121,8 @@ export class Client {
                 });
 
                 request
-                    .post(this.endpoint + '/upload/' + response.body._id)
-                    .set('Authorization', 'Bearer ' + accessToken)
+                    .post(`${this.endpoint}/upload/${response.body._id}`)
+                    .set('Authorization', `Bearer ${token.access_token}`)
                     .attach('file', file)
                     .on('progress', e => {
                         let progress = Math.round((e.loaded / e.total) * 100);
@@ -156,7 +139,7 @@ export class Client {
                 ;
             });
         }).catch(err => {
-            console.log('In catch block ' + err);
+            console.log(`In catch block ${err}`);
         });
     }
 }
