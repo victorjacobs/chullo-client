@@ -6,65 +6,45 @@ import * as ProgressBar from 'progress';
 let Table = require('cli-table');
 
 import {Clipboard} from './clipboard';
-import {OAuth} from './oauth';
+import {Configuration} from './configuration';
 
 export class Client {
-    // TODO more properly check responses from api (through status codes)
-    // TODO factor these out to environment-dependent things
-    private token: Promise<any>;
-    private clientId: string;
-    private clientSecret: string;
-    private endpoint: string;
-
-    constructor() {
-        this.endpoint = 'http://localhost:3000';
-        this.clientId = 'foo';
-        this.clientSecret = 'bar';
-        this.authenticate('victor@chullo.io', 'test');
-    }
-
-    private authenticate(username: string, password: string) {
-        let oauth = new OAuth(this.clientId, this.clientSecret, this.endpoint);
-        this.token = oauth.authenticate(username, password);
-    }
+    constructor(private config: Configuration) { }
 
     list() {
-        this.token.then(token => {
-            request
-                .get(`${this.endpoint}/files`)
-                .set('Authorization', `Bearer ${token.access_token}`)
-                .type('json')
-                .end((err, response) => {
-                    var table = new Table({
-                        head: ['Id', 'Name', 'Type', 'Uploaded'],
-                        colWidths: [30, 30, 30, 30],
-                        chars: {'mid': '', 'left-mid': '', 'mid-mid': '', 'right-mid': ''}
-                    });
+        request
+            .get(`${this.config.endpoint}/files`)
+            .set('Authorization', `Bearer ${this.config.accessToken}`)
+            .type('json')
+            .end((err, response) => {
+                var table = new Table({
+                    head: ['Id', 'Name', 'Type', 'Uploaded'],
+                    colWidths: [30, 30, 30, 30],
+                    chars: { 'mid': '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' }
+                });
 
-                    for (var file of response.body) {
-                        table.push([
-                            file._id, file.name, file.mime || 'none', file.updatedAt
-                        ]);
-                    }
+                for (var file of response.body) {
+                    table.push([
+                        file._id, file.name, file.mime || 'none', file.updatedAt
+                    ]);
+                }
 
-                    console.log(table.toString());
-                })
-        });
+                console.log(table.toString());
+            })
+        ;
     }
 
     delete(id: string) {
-        this.token.then(token => {
-            request
-                .delete(`${this.endpoint}/files/${id}`)
-                .set('Authorization', `Bearer ${token.access_token}`)
-                .type('json')
-                .end((err, response) => {
-                    if (err || !response.ok) {
-                        console.log(`Something went wrong: ${err}`);
-                    }
-                })
-            ;
-        });
+        request
+            .delete(`${this.config.endpoint}/files/${id}`)
+            .set('Authorization', `Bearer ${this.config.accessToken}`)
+            .type('json')
+            .end((err, response) => {
+                if (err || !response.ok) {
+                    console.log(`Something went wrong: ${err}`);
+                }
+            })
+        ;
     }
 
     watch(directory: string, pattern?: string, removeAfterUpload?: boolean): void {
@@ -88,58 +68,51 @@ export class Client {
     }
 
     upload(file: string): Promise<void> {
-        return this.token.then(token => {
-            console.log(`Starting upload of ${file}`);
-            // First do a POST to get a unique url to upload to
-            return new Promise((resolve, reject) => {
-                request
-                    .post(`${this.endpoint}/files`)
-                    .set('Authorization', `Bearer ${token.access_token}`)
-                    .type('json')
-                    .send({
-                        name: file.split('/').pop()
-                    })
-                    .end((err, response) => {
-                        if (err) {
-                            reject(`Error posting to files: ${err}`);
-                        }
+        console.log(`Starting upload of ${file}`);
+        // First do a POST to get a unique url to upload to
+        return (new Promise((resolve, reject) => {
+            request
+                .post(`${this.config.endpoint}/files`)
+                .set('Authorization', `Bearer ${this.config.accessToken}`)
+                .type('json')
+                .send({
+                    name: file.split('/').pop()
+                })
+                .end((err, response) => {
+                    if (err) {
+                        reject(`Error posting to files: ${err}`);
+                    }
 
-                        console.log(`File id ${response.body._id} view URL: ${response.body.viewUrl}`);
-                        Clipboard.copy(response.body.viewUrl);
-                        resolve(response);
-                    })
-                ;
-            })
-        }).then((response: request.Response) => {
-            // Then upload the file
-            this.token.then(token => {
-                let bar = new ProgressBar('Uploading [:bar] :percent :etas', {
-                    complete: '=',
-                    incomplete: ' ',
-                    width: 20,
-                    total: 100
-                });
-
-                request
-                    .post(`${this.endpoint}/upload/${response.body._id}`)
-                    .set('Authorization', `Bearer ${token.access_token}`)
-                    .attach('file', file)
-                    .on('progress', e => {
-                        let progress = Math.round((e.loaded / e.total) * 100);
-                        bar.tick(progress);
-                    })
-                    .end((err, response) => {
-                        if (err) {
-                            // TODO this reject doesnt work yet apparently
-                            return Promise.reject(err);
-                        }
-
-                        return response;
-                    })
-                ;
+                    console.log(`File id ${response.body._id} view URL: ${response.body.viewUrl}`);
+                    Clipboard.copy(response.body.viewUrl);
+                    resolve(response);
+                })
+            ;
+        })).then((response: request.Response) => {
+            let bar = new ProgressBar('Uploading [:bar] :percent :etas', {
+                complete: '=',
+                incomplete: ' ',
+                width: 20,
+                total: 100
             });
-        }).catch(err => {
-            console.log(`In catch block ${err}`);
+
+            request
+                .post(`${this.config.endpoint}/upload/${response.body._id}`)
+                .set('Authorization', `Bearer ${this.config.accessToken}`)
+                .attach('file', file)
+                .on('progress', e => {
+                    let progress = Math.round((e.loaded / e.total) * 100);
+                    bar.tick(progress);
+                })
+                .end((err, response) => {
+                    if (err) {
+                        // TODO this reject doesnt work yet apparently
+                        return Promise.reject(err);
+                    }
+
+                    return response;
+                })
+            ;
         });
     }
 }

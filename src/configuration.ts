@@ -1,51 +1,84 @@
 import * as fs from 'fs';
+import {Promise} from 'es6-promise';
 
 let osenv = require('osenv');
 let prompt = require('prompt');
 
 export class Configuration {
-    private clientId: string;
-    private clientSecret: string;
-    private endpoint: string;
-    private accessToken: string;
-    private refreshToken: string;
+    public clientId: string;
+    public clientSecret: string;
+    public endpoint: string;
+    public accessToken: string;
+    public refreshToken: string;
 
-    constructor() {
-        this.read();
-    }
-
-    private read() {
-        if (!fs.accessSync(this.path())) {
-            this.configure();
+    public static read(): Promise<Configuration> {
+        let config = new Configuration();
+        // TODO do a check here for oauth client params exist
+        if (!config.exists()) {
+            return config.configure();
         } else {
-            let data = JSON.parse(fs.readFileSync(this.path(), 'utf8'));
-            this.clientId = data.clientId;
-            this.clientSecret = data.clientSecret;
-            this.endpoint = data.endpoint;
-            this.accessToken = data.accessToken;
-            this.refreshToken = data.refreshToken;
+            let data = JSON.parse(fs.readFileSync(config.path(), 'utf8'));
+            config.copyFromObject(data);
+            return Promise.resolve(config);
         }
     }
 
-    private write() {
+    write() {
         fs.writeFileSync(this.path(), this.asJSON(), 'utf8');
     }
 
-    configure() {
-        prompt.message = '';
-        prompt.start();
-
-        let schema = {
-            properties: {
-                clientId: {
-                    default: 'test'
-                }
-            }
+    // Because node doesnt have a proper exists method
+    private exists() {
+        try {
+            fs.accessSync(this.path());
+        } catch (e) {
+            return false;
         }
 
-        prompt.get(schema, (err, result) => {
-            console.log(result);
+        return true;
+    }
+
+    private oauthParamsMissing() {
+        return !this.clientId || !this.clientSecret || !this.endpoint;
+    }
+
+    configure(): Promise<Configuration> {
+        return new Promise((resolve, reject) => {
+            prompt.message = '';
+            prompt.start();
+
+            let schema = {
+                properties: {
+                    clientId: {
+                        default: this.clientId
+                    },
+                    clientSecret: {
+                        default: this.clientSecret
+                    },
+                    endpoint: {
+                        default: this.endpoint
+                    }
+                }
+            }
+
+            prompt.get(schema, (err, result) => {
+                if (result === undefined) {
+                    return;
+                }
+
+                this.copyFromObject(result);
+                this.write();
+                resolve(this);
+            });
         });
+    }
+
+    copyFromObject(obj: any) {
+        this.clientId = obj.clientId || this.clientId;
+        this.clientSecret = obj.clientSecret || this.clientSecret;
+        this.endpoint = obj.endpoint || this.endpoint;
+        this.accessToken = obj.accessToken || this.accessToken;
+        this.refreshToken = obj.refreshToken || this.refreshToken;
     }
 
     path(): string {
