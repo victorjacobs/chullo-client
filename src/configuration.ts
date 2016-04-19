@@ -18,7 +18,7 @@ export class Configuration {
             return config.configure();
         } else {
             let data = JSON.parse(fs.readFileSync(config.path(), 'utf8'));
-            config.copyFromObject(data);
+            config.copyFrom(data);
             return Promise.resolve(config);
         }
     }
@@ -66,14 +66,14 @@ export class Configuration {
                     return;
                 }
 
-                this.copyFromObject(result);
+                this.copyFrom(result);
                 this.write();
                 resolve(this);
             });
         });
     }
 
-    copyFromObject(obj: any) {
+    copyFrom(obj: any) {
         this.clientId = obj.clientId || this.clientId;
         this.clientSecret = obj.clientSecret || this.clientSecret;
         this.endpoint = obj.endpoint || this.endpoint;

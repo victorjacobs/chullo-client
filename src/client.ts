@@ -12,39 +12,47 @@ export class Client {
     constructor(private config: Configuration) { }
 
     list() {
-        request
-            .get(`${this.config.endpoint}/files`)
-            .set('Authorization', `Bearer ${this.config.accessToken}`)
-            .type('json')
-            .end((err, response) => {
-                var table = new Table({
-                    head: ['Id', 'Name', 'Type', 'Uploaded'],
-                    colWidths: [30, 30, 30, 30],
-                    chars: { 'mid': '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' }
-                });
+        return new Promise((resolve, reject) => {
+            request
+                .get(`${this.config.endpoint}/files`)
+                .set('Authorization', `Bearer ${this.config.accessToken}`)
+                .type('json')
+                .end((err, response) => {
+                    if (err) return reject(err);
 
-                for (var file of response.body) {
-                    table.push([
-                        file._id, file.name, file.mime || 'none', file.updatedAt
-                    ]);
-                }
+                    let table = new Table({
+                        head: ['Id', 'Name', 'Type', 'Uploaded'],
+                        colWidths: [30, 30, 30, 30],
+                        chars: { 'mid': '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' }
+                    });
 
-                console.log(table.toString());
-            })
-        ;
+                    for (var file of response.body) {
+                        table.push([
+                            file._id, file.name, file.mime || 'none', file.updatedAt
+                        ]);
+                    }
+
+                    console.log(table.toString());
+                    resolve();
+                })
+        });
     }
 
     delete(id: string) {
-        request
-            .delete(`${this.config.endpoint}/files/${id}`)
-            .set('Authorization', `Bearer ${this.config.accessToken}`)
-            .type('json')
-            .end((err, response) => {
-                if (err || !response.ok) {
-                    console.log(`Something went wrong: ${err}`);
-                }
-            })
-        ;
+        return new Promise((resolve, reject) => {
+            request
+                .delete(`${this.config.endpoint}/files/${id}`)
+                .set('Authorization', `Bearer ${this.config.accessToken}`)
+                .type('json')
+                .end((err, response) => {
+                    if (err || !response.ok) {
+                        return reject(`Something went wrong: ${err}`);
+                    }
+
+                    resolve();
+                })
+            ;
+        });
     }
 
     watch(directory: string, pattern?: string, removeAfterUpload?: boolean): void {

@@ -33,7 +33,10 @@ export class OAuth {
                 .send(payload)
                 .end((err, response) => {
                     if (!err) {
-                        resolve(response.body);
+                        resolve({
+                            accessToken: response.body.access_token,
+                            refreshToken: response.body.refresh_token
+                        });
                     } else {
                         reject(err);
                     }

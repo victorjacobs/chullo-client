@@ -17,7 +17,7 @@ Configuration.read().then(configuration => {
         .description('Login')
         .action((user, password) => {
             oauth.authenticate(user, password).then((token: any) => {
-                configuration.copyFromObject(token);
+                configuration.copyFrom(token);
                 configuration.write();
                 console.log(`Now logged in as ${user}`);
             }), err => {
