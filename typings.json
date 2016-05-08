@@ -2,9 +2,11 @@
   "ambientDependencies": {
     "chokidar": "registry:dt/chokidar#1.4.3+20160316155526",
     "commander": "registry:dt/commander#2.3.0+20160317120654",
+    "form-data": "registry:dt/form-data#0.0.0+20160316155526",
     "node": "registry:dt/node#4.0.0+20160412142033",
+    "object-assign": "registry:dt/object-assign#4.0.1+20160316155526",
     "progress": "registry:dt/progress#1.1.8+20160317120654",
-    "superagent": "registry:dt/superagent#1.4.0+20160317120654"
+    "request": "registry:dt/request#0.0.0+20160316155526"
   },
   "dependencies": {
     "es6-promise": "registry:npm/es6-promise#3.0.0+20160211003958"

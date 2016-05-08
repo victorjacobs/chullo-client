@@ -6,7 +6,7 @@ import {OAuth} from './oauth';
 
 Configuration.read().then(configuration => {
     let oauth = new OAuth(configuration);
-    let client = new Client(configuration);
+    let client = new Client(oauth);
 
     program
         .version('0.0.1')
@@ -48,7 +48,7 @@ Configuration.read().then(configuration => {
         .option('-i, --include <pattern>', 'Filter files to upload according to pattern')
         .option('-r, --remove-after-upload', 'Remove local file after upload')
         .action((dir, options) => {
-            client.watch(dir, options.include, options.removeAfterUpload);
+            // client.watch(dir, options.include, options.removeAfterUpload);
         })
     ;
 
@@ -56,7 +56,7 @@ Configuration.read().then(configuration => {
         .command('upload <file>')
         .description('Upload a single file')
         .action(file => {
-            client.upload(file);
+            // client.upload(file);
         })
     ;
 
