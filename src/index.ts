@@ -20,9 +20,9 @@ Configuration.read().then(configuration => {
                 configuration.copyFrom(token);
                 configuration.write();
                 console.log(`Now logged in as ${user}`);
-            }), err => {
+            }, err => {
                 console.log(`Login failed: ${err}`);
-            };
+            });
         })
     ;
 
@@ -49,6 +49,14 @@ Configuration.read().then(configuration => {
         .option('-r, --remove-after-upload', 'Remove local file after upload')
         .action((dir, options) => {
             client.watch(dir, options.include, options.removeAfterUpload);
+        })
+    ;
+
+    program
+        .command('password <newPassword>')
+        .description('Change the password of currently logged in user')
+        .action(newPassword => {
+            client.changePassword(newPassword);
         })
     ;
 

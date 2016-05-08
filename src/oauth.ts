@@ -35,16 +35,19 @@ export class OAuth {
                 form: payload,
                 json: true
             }, (err, response, body) => {
-                if (!err) {
-                    resolve({
-                        accessToken: body.access_token,
-                        refreshToken: body.refresh_token
-                    });
-                } else {
-                    reject(err);
-                }
+                if (err) return reject(err);
+                if (response.statusCode != 200) return reject(body.error_description);
+
+                resolve({
+                    accessToken: body.access_token,
+                    refreshToken: body.refresh_token
+                });
             });
         });
+    }
+
+    generateAbsoluteUrl(relative: string) {
+        return `${this.config.endpoint}${relative}`;
     }
 
     authenticatedRequest(url, requestConfig, onProgress?): Promise<any> {

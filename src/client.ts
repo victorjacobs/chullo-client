@@ -75,8 +75,10 @@ export class Client {
                 name: file.split('/').pop()
             }
         }).then(body => {
-            console.log(`File id ${body._id} view URL: ${body.viewUrl}`);
-            Clipboard.copy(body.viewUrl);
+            // TODO might want to move the viewUrl to server side, not sure
+            let viewUrl = this.oauth.generateAbsoluteUrl(`/v/${body._id}`);
+            console.log(`File id ${body._id} view URL: ${viewUrl}`);
+            Clipboard.copy(viewUrl);
             return body;
         }).then(body => {
             let bar = new ProgressBar('Uploading [:bar] :percent :etas', {
@@ -95,5 +97,14 @@ export class Client {
                 bar.tick(state.percentage);
             })
         });
+    }
+
+    changePassword(newPassword: string) {
+        return this.oauth.authenticatedRequest('/users/me', {
+            method: 'PUT',
+            body: {
+                password: newPassword
+            }
+        })
     }
 }
