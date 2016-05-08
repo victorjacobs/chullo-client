@@ -1,6 +1,7 @@
 import {Promise} from 'es6-promise';
 import {Configuration} from './configuration';
 import * as request from 'request';
+var progress = require('request-progress');
 let objectAssign = require('object-assign');
 
 export class OAuth {
@@ -46,7 +47,7 @@ export class OAuth {
         });
     }
 
-    authenticatedRequest(url, requestConfig, cb) {
+    authenticatedRequest(url, requestConfig, onProgress?): Promise<any> {
         let enrichRequestConfigWithToken = (requestConfig) => {
             return objectAssign({}, requestConfig, {
                 url: `${this.config.endpoint}${url}`,
@@ -57,21 +58,29 @@ export class OAuth {
             });
         }
 
-        // TODO maybe do this with promises
-        request(enrichRequestConfigWithToken(requestConfig), (err, response, body) => {
-            if (response.statusCode == 401) {
-                // If we get unauthorized, try to refresh the token and try again
-                return this.authenticate(this.config.refreshToken).then(token => {
-                    this.config.copyFrom(token);
-                    this.config.write();
+        return new Promise((resolve, reject) => {
+            progress(request(enrichRequestConfigWithToken(requestConfig), (err, response, body) => {
+                if (response.statusCode == 401) {
+                    // If we get unauthorized, try to refresh the token and try again
+                    return this.authenticate(this.config.refreshToken).then(token => {
+                        this.config.copyFrom(token);
+                        this.config.write();
 
-                    request(enrichRequestConfigWithToken(requestConfig), cb);
-                }, err => {
-                    console.log(err);
-                });
-            }
+                        progress(request(enrichRequestConfigWithToken(requestConfig), (err, response, body) => {
+                            if (err) return reject(err);
 
-            return cb(err, response, body);
+                            // TODO might pass entire response here too
+                            resolve(body);
+                        })).on('progress', onProgress || function(){});
+                    }, err => {
+                        reject(err);
+                    });
+                }
+
+                if (err) reject(err);
+
+                resolve(body);
+            })).on('progress', onProgress || function(){});
         });
     }
 }
