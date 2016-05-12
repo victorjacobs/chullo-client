@@ -67,7 +67,7 @@ export class Client {
         })
     }
 
-    upload(file: string): Promise<string> {
+    upload(file: string): Promise<void> {
         console.log(`Starting upload of ${file}`);
         return this.oauth.authenticatedRequest('/files', {
             method: 'POST',
@@ -96,6 +96,8 @@ export class Client {
             }, state => {
                 bar.tick(state.percentage);
             })
+        }).then(() => {
+            console.log('Done');
         });
     }
 
