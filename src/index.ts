@@ -86,11 +86,12 @@ Configuration.read().then(configuration => {
     ;
 
     program
-        .command('status')
-        .description('Server status information')
+        .command('stats')
+        .description('Server stats')
         .action(() => {
-            client.status().then(body => {
+            client.stats().then(body => {
                 console.log(`${configuration.endpoint} currently serving ${body.files} files for a total of ${filesize(body.totalSize)}.`);
+                console.log(`These files were accessed a total of ${body.totalAccesses} times, resulting in ${filesize(body.totalTraffic)} of traffic.`);
             });
         })
     ;

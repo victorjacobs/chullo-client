@@ -18,15 +18,15 @@ export class Client {
                 method: 'GET'
             }).then(body => {
                 let table = new Table({
-                    head: ['Id', 'Name', 'Uploaded', 'Size'],
-                    colWidths: [30, 30, 30, 15],
+                    head: ['Id', 'Name', 'Size', 'Accesses'],
+                    colWidths: [26, 30, 15, 10],
                     chars: { 'mid': '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' }
                 });
 
                 for (var file of body) {
                     file.size = file.size ? filesize(file.size) : 'None';
                     table.push([
-                        file._id, file.name, file.updatedAt, file.size
+                        file._id, file.name, file.size, file.accesses || 'none'
                     ]);
                 }
 
@@ -116,7 +116,7 @@ export class Client {
         });
     }
 
-    status(): Promise<any> {
-        return this.oauth.authenticatedRequest('/status', {});
+    stats(): Promise<any> {
+        return this.oauth.authenticatedRequest('/stats', {});
     }
 }
