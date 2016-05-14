@@ -21,6 +21,7 @@
     "cli-table": "^0.3.1",
     "commander": "^2.9.0",
     "es6-promise": "^3.1.2",
+    "filesize": "^3.3.0",
     "form-data": "^1.0.0-rc4",
     "object-assign": "^4.1.0",
     "osenv": "^0.1.3",

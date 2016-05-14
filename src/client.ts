@@ -1,8 +1,10 @@
 import * as fs from 'fs';
+import * as child_process from 'child_process';
 import * as chokidar from 'chokidar';
 import {Promise} from 'es6-promise';
 import * as ProgressBar from 'progress';
 let Table = require('cli-table');
+import * as filesize from 'filesize';
 
 import {Clipboard} from './clipboard';
 import {OAuth} from './oauth';
@@ -16,14 +18,15 @@ export class Client {
                 method: 'GET'
             }).then(body => {
                 let table = new Table({
-                    head: ['Id', 'Name', 'Type', 'Uploaded'],
-                    colWidths: [30, 30, 30, 30],
+                    head: ['Id', 'Name', 'Uploaded', 'Size'],
+                    colWidths: [30, 30, 30, 15],
                     chars: { 'mid': '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' }
                 });
 
                 for (var file of body) {
+                    file.size = file.size ? filesize(file.size) : 'None';
                     table.push([
-                        file._id, file.name, file.mime || 'none', file.updatedAt
+                        file._id, file.name, file.updatedAt, file.size
                     ]);
                 }
 
@@ -63,6 +66,9 @@ export class Client {
                 if (removeAfterUpload) {
                     fs.unlinkSync(path);
                 }
+
+                // Play sound after complete
+                child_process.execSync('afplay /System/Library/Sounds/Glass.aiff');
             });
         })
     }
@@ -107,6 +113,10 @@ export class Client {
             body: {
                 password: newPassword
             }
-        })
+        });
+    }
+
+    status(): Promise<any> {
+        return this.oauth.authenticatedRequest('/status', {});
     }
 }

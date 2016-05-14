@@ -3,6 +3,7 @@ import * as program from 'commander';
 import {Client} from './client';
 import {Configuration} from './configuration';
 import {OAuth} from './oauth';
+import * as filesize from 'filesize';
 
 Configuration.read().then(configuration => {
     let oauth = new OAuth(configuration);
@@ -81,6 +82,16 @@ Configuration.read().then(configuration => {
         .description('Deletes given file')
         .action(id => {
             client.delete(id);
+        })
+    ;
+
+    program
+        .command('status')
+        .description('Server status information')
+        .action(() => {
+            client.status().then(body => {
+                console.log(`${configuration.endpoint} currently serving ${body.files} files for a total of ${filesize(body.totalSize)}.`);
+            });
         })
     ;
 

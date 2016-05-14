@@ -85,10 +85,6 @@ export class Configuration {
         return `${osenv.home()}/.chullorc`;
     }
 
-    asArray(): Array<string> {
-        return [];
-    }
-
     asJSON(): any {
         return JSON.stringify({
             clientId: this.clientId,
