@@ -17,20 +17,42 @@ export class Configuration {
         if (!config.exists()) {
             return config.configure();
         } else {
-            let data = JSON.parse(fs.readFileSync(config.path(), 'utf8'));
+            let data = {};
+            try {
+                data = JSON.parse(fs.readFileSync(Configuration.path(), 'utf8'));
+            } catch (e) {
+                return config.configure();
+            }
+
             config.copyFrom(data);
             return Promise.resolve(config);
         }
     }
 
+    static switchEnvironment(fromEnv: string, toEnv: string): Promise<Configuration> {
+        let fromConfig = `${Configuration.path()}.${fromEnv}`;
+        let toConfig = `${Configuration.path()}.${toEnv}`;
+
+        try {
+            fs.accessSync(toConfig);
+        } catch (e) {
+            return Configuration.read();
+        }
+
+        fs.renameSync(Configuration.path(), fromConfig);
+        fs.renameSync(toConfig, Configuration.path());
+
+        return Configuration.read();
+    }
+
     write() {
-        fs.writeFileSync(this.path(), this.asJSON(), 'utf8');
+        fs.writeFileSync(Configuration.path(), this.asJSON(), 'utf8');
     }
 
     // Because node doesnt have a proper exists method
     private exists() {
         try {
-            fs.accessSync(this.path());
+            fs.accessSync(Configuration.path());
         } catch (e) {
             return false;
         }
@@ -81,7 +103,7 @@ export class Configuration {
         this.refreshToken = obj.refreshToken || this.refreshToken;
     }
 
-    path(): string {
+    static path(): string {
         return `${osenv.home()}/.chullorc`;
     }
 

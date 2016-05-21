@@ -62,6 +62,11 @@ export class OAuth {
         }
 
         return new Promise((resolve, reject) => {
+            if (!this.config.accessToken || !this.config.refreshToken) {
+                console.log('Log in first before doing anything else');
+                return reject();
+            }
+
             progress(request(enrichRequestConfigWithToken(requestConfig), (err, response, body) => {
                 if (response.statusCode == 401) {
                     // If we get unauthorized, try to refresh the token and try again

@@ -66,9 +66,6 @@ export class Client {
                 if (removeAfterUpload) {
                     fs.unlinkSync(path);
                 }
-
-                // Play sound after complete
-                child_process.execSync('afplay /System/Library/Sounds/Glass.aiff');
             });
         })
     }
@@ -104,6 +101,8 @@ export class Client {
             })
         }).then(() => {
             console.log('Done');
+            // Play sound after complete
+            child_process.execSync('afplay /System/Library/Sounds/Glass.aiff');
         });
     }
 

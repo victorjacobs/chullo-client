@@ -36,6 +36,26 @@ Configuration.read().then(configuration => {
     ;
 
     program
+        .command('dev')
+        .description('Moves production configuration out of the way for development')
+        .action(() => {
+            Configuration.switchEnvironment('prod', 'dev').then(newConfig => {
+                console.log(`Configuration for ${newConfig.endpoint} loaded`);
+            });
+        })
+    ;
+
+    program
+        .command('prod')
+        .description('Moves production configuration back in place')
+        .action(() => {
+            Configuration.switchEnvironment('dev', 'prod').then(newConfig => {
+                console.log(`Configuration for ${newConfig.endpoint} loaded`);
+            });
+        })
+    ;
+
+    program
         .command('configure')
         .description('Set configuration values')
         .action(() => {
