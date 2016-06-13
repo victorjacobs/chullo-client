@@ -5,11 +5,9 @@ let osenv = require('osenv');
 let prompt = require('prompt');
 
 export class Configuration {
-    public clientId: string;
-    public clientSecret: string;
-    public endpoint: string;
-    public accessToken: string;
-    public refreshToken: string;
+    public static path(): string {
+        return `${osenv.home()}/.chullorc`;
+    }
 
     public static read(): Promise<Configuration> {
         let config = new Configuration();
@@ -29,7 +27,7 @@ export class Configuration {
         }
     }
 
-    static switchEnvironment(fromEnv: string, toEnv: string): Promise<Configuration> {
+    public static switchEnvironment(fromEnv: string, toEnv: string): Promise<Configuration> {
         let fromConfig = `${Configuration.path()}.${fromEnv}`;
         let toConfig = `${Configuration.path()}.${toEnv}`;
 
@@ -45,26 +43,17 @@ export class Configuration {
         return Configuration.read();
     }
 
-    write() {
+    public clientId: string;
+    public clientSecret: string;
+    public endpoint: string;
+    public accessToken: string;
+    public refreshToken: string;
+
+    public write() {
         fs.writeFileSync(Configuration.path(), this.asJSON(), 'utf8');
     }
 
-    // Because node doesnt have a proper exists method
-    private exists() {
-        try {
-            fs.accessSync(Configuration.path());
-        } catch (e) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private oauthParamsMissing() {
-        return !this.clientId || !this.clientSecret || !this.endpoint;
-    }
-
-    configure(): Promise<Configuration> {
+    public configure(): Promise<Configuration> {
         return new Promise((resolve, reject) => {
             prompt.message = '';
             prompt.start();
@@ -95,7 +84,7 @@ export class Configuration {
         });
     }
 
-    copyFrom(obj: any) {
+    public copyFrom(obj: any) {
         this.clientId = obj.clientId || this.clientId;
         this.clientSecret = obj.clientSecret || this.clientSecret;
         this.endpoint = obj.endpoint || this.endpoint;
@@ -103,17 +92,28 @@ export class Configuration {
         this.refreshToken = obj.refreshToken || this.refreshToken;
     }
 
-    static path(): string {
-        return `${osenv.home()}/.chullorc`;
-    }
-
-    asJSON(): any {
+    public asJSON(): any {
         return JSON.stringify({
+            accessToken: this.accessToken,
             clientId: this.clientId,
             clientSecret: this.clientSecret,
             endpoint: this.endpoint,
-            accessToken: this.accessToken,
-            refreshToken: this.refreshToken
+            refreshToken: this.refreshToken,
         });
+    }
+
+    // Because node doesnt have a proper exists method
+    private exists() {
+        try {
+            fs.accessSync(Configuration.path());
+        } catch (e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private oauthParamsMissing() {
+        return !this.clientId || !this.clientSecret || !this.endpoint;
     }
 }

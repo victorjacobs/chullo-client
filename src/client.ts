@@ -12,36 +12,36 @@ import {OAuth} from './oauth';
 export class Client {
     constructor(private oauth: OAuth) { }
 
-    list() {
+    public list() {
         return new Promise((resolve, reject) => {
             this.oauth.authenticatedRequest('/files', {
-                method: 'GET'
+                method: 'GET',
             }).then(body => {
                 let table = new Table({
-                    head: ['Id', 'Name', 'Size', 'Accesses'],
+                    chars: { 'mid': '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
                     colWidths: [26, 30, 15, 10],
-                    chars: { 'mid': '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' }
+                    head: ['Id', 'Name', 'Size', 'Accesses'],
                 });
 
-                for (var file of body) {
+                for (let file of body) {
                     file.size = file.size ? filesize(file.size) : 'None';
                     table.push([
-                        file._id, file.name, file.size, file.accesses || 'none'
+                        file._id, file.name, file.size, file.accesses || 'none',
                     ]);
                 }
 
                 console.log(table.toString());
                 resolve();
             }, err => {
-                reject(err)
+                reject(err);
             });
         });
     }
 
-    delete(id: string) {
+    public delete(id: string) {
         return new Promise((resolve, reject) => {
             this.oauth.authenticatedRequest(`/files/${id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
             }).then(body => {
                 resolve();
             }, err => {
@@ -50,15 +50,15 @@ export class Client {
         });
     }
 
-    watch(directory: string, pattern?: string, removeAfterUpload?: boolean): void {
+    public watch(directory: string, pattern?: string, removeAfterUpload?: boolean): void {
         let watchPattern = directory;
         if (pattern) {
             watchPattern += '/' + pattern;
         }
 
         let watcher = chokidar.watch(watchPattern, {
+            awaitWriteFinish: true,
             ignoreInitial: true,
-            awaitWriteFinish: true
         });
 
         watcher.on('add', path => {
@@ -70,13 +70,13 @@ export class Client {
         })
     }
 
-    upload(file: string): Promise<void> {
+    public upload(file: string): Promise<void> {
         console.log(`Starting upload of ${file}`);
         return this.oauth.authenticatedRequest('/files', {
-            method: 'POST',
             body: {
-                name: file.split('/').pop()
-            }
+                name: file.split('/').pop(),
+            },
+            method: 'POST',
         }).then(body => {
             // TODO might want to move the viewUrl to server side, not sure
             let viewUrl = this.oauth.generateAbsoluteUrl(`/v/${body._id}`);
@@ -87,18 +87,18 @@ export class Client {
             let bar = new ProgressBar('Uploading [:bar] :percent :etas', {
                 complete: '=',
                 incomplete: ' ',
+                total: 100,
                 width: 20,
-                total: 100
             });
 
             return this.oauth.authenticatedRequest(`/upload/${body._id}`, {
                 formData: {
-                    file: fs.createReadStream(file)
+                    file: fs.createReadStream(file),
                 },
-                method: 'POST'
+                method: 'POST',
             }, state => {
                 bar.tick(state.percentage);
-            })
+            });
         }).then(() => {
             console.log('Done');
             // Play sound after complete
@@ -106,16 +106,16 @@ export class Client {
         });
     }
 
-    changePassword(newPassword: string) {
+    public changePassword(newPassword: string) {
         return this.oauth.authenticatedRequest('/users/me', {
-            method: 'PUT',
             body: {
-                password: newPassword
-            }
+                password: newPassword,
+            },
+            method: 'PUT',
         });
     }
 
-    stats(): Promise<any> {
+    public stats(): Promise<any> {
         return this.oauth.authenticatedRequest('/stats', {});
     }
 }

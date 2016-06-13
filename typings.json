@@ -1,5 +1,5 @@
 {
-  "ambientDependencies": {
+  "globalDependencies": {
     "chokidar": "registry:dt/chokidar#1.4.3+20160316155526",
     "commander": "registry:dt/commander#2.3.0+20160317120654",
     "filesize": "registry:dt/filesize#3.2.1+20160412140448",
