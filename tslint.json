@@ -1,13 +1,9 @@
 {
-   // follow the stable, somewhat opinionated set of rules which we encourage for general TypeScript programming. 
-   // This configuration follows semver, so it will not have breaking changes across minor or patch releases.
-   "extends": "tslint:recommended",
-   "rules": {
-       // Any rules specified here will override those from the base config we are extending
-       "comment-format": [ true, "check-space" ],
-       "quotemark": [ true, "single" ],
-       "no-console": [ false ],
-       "no-var-requires": false,
-       "curly": false
-   }
+    "extends": "tslint:recommended",
+    "rules": {
+        "comment-format": [true ,"check-space"],
+        "quotemark": [true, "single"],
+        "no-console": [false],
+        "curly": false
+    }
 }

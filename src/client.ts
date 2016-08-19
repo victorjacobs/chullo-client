@@ -67,7 +67,7 @@ export class Client {
                     fs.unlinkSync(path);
                 }
             });
-        })
+        });
     }
 
     public upload(file: string): Promise<void> {

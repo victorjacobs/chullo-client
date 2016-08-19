@@ -40,7 +40,7 @@ export class OAuth {
 
                 resolve({
                     accessToken: body.access_token,
-                    refreshToken: body.refresh_token
+                    refreshToken: body.refresh_token,
                 });
             });
         });
@@ -59,7 +59,7 @@ export class OAuth {
                 json: true,
                 url: `${this.config.endpoint}${url}`,
             });
-        }
+        };
 
         return new Promise((resolve, reject) => {
             if (!this.config.accessToken || !this.config.refreshToken) {
@@ -68,7 +68,7 @@ export class OAuth {
             }
 
             progress(request(enrichRequestConfigWithToken(requestConfig), (err, response, body) => {
-                if (response.statusCode == 401) {
+                if (response.statusCode === 401) {
                     // If we get unauthorized, try to refresh the token and try again
                     return this.authenticate(this.config.refreshToken).then(token => {
                         this.config.copyFrom(token);

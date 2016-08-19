@@ -61,16 +61,16 @@ export class Configuration {
             let schema = {
                 properties: {
                     clientId: {
-                        default: this.clientId
+                        default: this.clientId,
                     },
                     clientSecret: {
-                        default: this.clientSecret
+                        default: this.clientSecret,
                     },
                     endpoint: {
-                        default: this.endpoint
-                    }
-                }
-            }
+                        default: this.endpoint,
+                    },
+                },
+            };
 
             prompt.get(schema, (err, result) => {
                 if (result === undefined) {
