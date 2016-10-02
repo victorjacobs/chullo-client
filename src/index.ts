@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import * as program from 'commander';
-import {Client} from './client';
-import {Configuration} from './configuration';
-import {OAuth} from './oauth';
+import { Client } from './client';
+import { Configuration } from './configuration';
+import { OAuth } from './oauth';
 import * as filesize from 'filesize';
 
 Configuration.read().then(configuration => {
@@ -106,12 +106,13 @@ Configuration.read().then(configuration => {
     ;
 
     program
-        .command('stats')
-        .description('Server stats')
+        .command('status')
+        .description('Server status')
         .action(() => {
             client.stats().then(body => {
                 console.log(`${configuration.endpoint} currently serving ${body.files} files for a total of ${filesize(body.totalSize)}.`);
                 console.log(`These files were accessed a total of ${body.totalAccesses} times, resulting in ${filesize(body.totalTraffic)} of traffic.`);
+                console.log(`Running version ${body.version}, built on ${body.builtOn}.`);
             });
         })
     ;

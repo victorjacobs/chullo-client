@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as child_process from 'child_process';
 import * as chokidar from 'chokidar';
-import {Promise} from 'es6-promise';
 import * as ProgressBar from 'progress';
 let Table = require('cli-table');
 import * as filesize from 'filesize';
@@ -116,6 +115,6 @@ export class Client {
     }
 
     public stats(): Promise<any> {
-        return this.oauth.authenticatedRequest('/stats', {});
+        return this.oauth.authenticatedRequest('/status', {});
     }
 }

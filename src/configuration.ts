@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import {Promise} from 'es6-promise';
 
 let osenv = require('osenv');
 let prompt = require('prompt');
@@ -111,9 +110,5 @@ export class Configuration {
         }
 
         return true;
-    }
-
-    private oauthParamsMissing() {
-        return !this.clientId || !this.clientSecret || !this.endpoint;
     }
 }

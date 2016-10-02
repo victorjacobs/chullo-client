@@ -1,8 +1,6 @@
-import {Promise} from 'es6-promise';
-import {Configuration} from './configuration';
+import { Configuration } from './configuration';
 import * as request from 'request';
 let progress = require('request-progress');
-let objectAssign = require('object-assign');
 
 export class OAuth {
     constructor(private config: Configuration) {}
@@ -51,8 +49,8 @@ export class OAuth {
     }
 
     public authenticatedRequest(url, requestConfig, onProgress?): Promise<any> {
-        let enrichRequestConfigWithToken = (requestConfig) => {
-            return objectAssign({}, requestConfig, {
+        let enrichRequestConfigWithToken = config => {
+            return Object.assign({}, config, {
                 auth: {
                     bearer: this.config.accessToken,
                 },
