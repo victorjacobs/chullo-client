@@ -11,9 +11,10 @@ import {OAuth} from './oauth';
 export class Client {
     constructor(private oauth: OAuth) { }
 
-    public list() {
+    public list(searchString?: string) {
         return new Promise((resolve, reject) => {
-            this.oauth.authenticatedRequest('/files', {
+            const url = searchString ? `/files?query=${searchString}` : '/files';
+            this.oauth.authenticatedRequest(url, {
                 method: 'GET',
             }).then(body => {
                 let table = new Table({

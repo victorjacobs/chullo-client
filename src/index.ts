@@ -117,5 +117,13 @@ Configuration.read().then(configuration => {
         })
     ;
 
+    program
+        .command('search <string>')
+        .description('Search for a file')
+        .action(searchQuery => {
+            client.list(searchQuery);
+        })
+    ;
+
     program.parse(process.argv);
 });
