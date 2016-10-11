@@ -4,6 +4,7 @@ import * as chokidar from 'chokidar';
 import * as ProgressBar from 'progress';
 let Table = require('cli-table');
 import * as filesize from 'filesize';
+import * as QueryString from 'query-string';
 
 import {Clipboard} from './clipboard';
 import {OAuth} from './oauth';
@@ -11,9 +12,10 @@ import {OAuth} from './oauth';
 export class Client {
     constructor(private oauth: OAuth) { }
 
-    public list(searchString?: string) {
+    public list(queryObject?: any) {
         return new Promise((resolve, reject) => {
-            const url = searchString ? `/files?query=${searchString}` : '/files';
+            const url = queryObject ? `/files?${QueryString.stringify(queryObject)}` : '/files';
+
             this.oauth.authenticatedRequest(url, {
                 method: 'GET',
             }).then(body => {

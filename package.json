@@ -23,6 +23,7 @@
     "@types/form-data": "0.0.32",
     "@types/node": "^6.0.41",
     "@types/progress": "^1.1.28",
+    "@types/query-string": "^3.0.28",
     "@types/request": "0.0.31",
     "chokidar": "^1.4.3",
     "cli-table": "^0.3.1",
@@ -32,6 +33,7 @@
     "osenv": "^0.1.3",
     "progress": "^1.1.8",
     "prompt": "^1.0.0",
+    "query-string": "^4.2.3",
     "request": "^2.72.0",
     "request-progress": "^2.0.1"
   }

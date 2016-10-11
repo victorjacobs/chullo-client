@@ -92,8 +92,13 @@ Configuration.read().then(configuration => {
     program
         .command('list')
         .description('List all files uploaded')
-        .action(() => {
-            client.list();
+        .option('-s, --sort <field>', 'Field to sort on')
+        .option('-d, --direction <direction>', 'Direction to sort in')
+        .action(options => {
+            client.list({
+                direction: options.direction,
+                sort: options.sort,
+            });
         })
     ;
 
@@ -121,7 +126,9 @@ Configuration.read().then(configuration => {
         .command('search <string>')
         .description('Search for a file')
         .action(searchQuery => {
-            client.list(searchQuery);
+            client.list({
+                query: searchQuery,
+            });
         })
     ;
 
