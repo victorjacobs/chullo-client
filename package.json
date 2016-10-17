@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "prepublish": "typings install && npm run build",
+    "prepublish": "npm run build",
     "watch": "tsc -w"
   },
   "bin": {

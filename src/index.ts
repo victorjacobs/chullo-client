@@ -106,7 +106,9 @@ Configuration.read().then(configuration => {
         .command('delete <id>')
         .description('Deletes given file')
         .action(id => {
-            client.delete(id);
+            client.delete(id).then((response) => {
+                console.log(response);
+            });
         })
     ;
 
@@ -114,7 +116,7 @@ Configuration.read().then(configuration => {
         .command('status')
         .description('Server status')
         .action(() => {
-            client.stats().then(body => {
+            client.status().then(body => {
                 console.log(`${configuration.endpoint} currently serving ${body.files} files for a total of ${filesize(body.totalSize)}.`);
                 console.log(`These files were accessed a total of ${body.totalAccesses} times, resulting in ${filesize(body.totalTraffic)} of traffic.`);
                 console.log(`Running version ${body.version}, built on ${body.builtOn}.`);

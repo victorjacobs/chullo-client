@@ -6,8 +6,8 @@ let Table = require('cli-table');
 import * as filesize from 'filesize';
 import * as QueryString from 'query-string';
 
-import {Clipboard} from './clipboard';
-import {OAuth} from './oauth';
+import { Clipboard } from './clipboard';
+import { OAuth } from './oauth';
 
 export class Client {
     constructor(private oauth: OAuth) { }
@@ -41,14 +41,8 @@ export class Client {
     }
 
     public delete(id: string) {
-        return new Promise((resolve, reject) => {
-            this.oauth.authenticatedRequest(`/files/${id}`, {
-                method: 'DELETE',
-            }).then(body => {
-                resolve();
-            }, err => {
-                reject(`Something went wrong: ${err}`);
-            });
+        return this.oauth.authenticatedRequest(`/files/${id}`, {
+            method: 'DELETE',
         });
     }
 
@@ -117,7 +111,7 @@ export class Client {
         });
     }
 
-    public stats(): Promise<any> {
+    public status(): Promise<any> {
         return this.oauth.authenticatedRequest('/status', {});
     }
 }
