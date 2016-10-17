@@ -107,7 +107,7 @@ Configuration.read().then(configuration => {
         .description('Deletes given file')
         .action(id => {
             client.delete(id).then(response => {
-                if (!response) {
+                if (response) {
                     console.log(response);
                 }
             });
