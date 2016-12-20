@@ -90,20 +90,22 @@ Configuration.read().then(configuration => {
     ;
 
     program
-        .command('list')
+        .command('ls')
         .description('List all files uploaded')
         .option('-s, --sort <field>', 'Field to sort on')
         .option('-d, --direction <direction>', 'Direction to sort in')
+        .option('-ps, --page-size <page-size>', 'Page size of pagination')
         .action(options => {
             client.list({
                 direction: options.direction,
+                page_size: options.pageSize,
                 sort: options.sort,
             });
         })
     ;
 
     program
-        .command('delete <id>')
+        .command('rm <id>')
         .description('Deletes given file')
         .action(id => {
             client.delete(id).then(response => {
